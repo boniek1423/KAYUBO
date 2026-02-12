@@ -10,14 +10,14 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
-// --- NUESTRA "BASE DE DATOS" TEMPORAL ---
-// Sacamos la lista de la ruta GET para que sea global y modificable
+// --- VARIABLES GLOBALES (Mantenlas aquí arriba) ---
+const CLAVE_SECRETA = "kayubo123"; // <--- MOVIDA AQUÍ PARA QUE TODOS LA VEAN
 let noticias = [
     { titulo: 'Node.js es veloz', autor: 'Admin' },
     { titulo: 'Vercel es genial', autor: 'Soporte' }
 ];
 
-// 3. Ruta Principal (Muestra las noticias actuales)
+// 3. Ruta Principal
 app.get('/', (req, res) => {
     res.render('index', { 
         usuario: 'Programador', 
@@ -28,26 +28,24 @@ app.get('/', (req, res) => {
 // 4. Ruta del Panel Admin
 app.get('/admin', (req, res) => {
     const llaveIngresada = req.query.key;
-    const CLAVE_SECRETA = "kayubo123"; // Asegúrate de que coincida
 
     if (llaveIngresada === CLAVE_SECRETA) {
-        // EL ARREGLO ESTÁ AQUÍ: Debes pasar { noticias: noticias }
         res.render('admin', { noticias: noticias }); 
     } else {
-        // Si no hay clave, redirigimos al home
         res.redirect('/');
     }
 });
 
-// 5. Lógica para GUARDAR noticias (Protegida)
+// 5. Lógica para GUARDAR noticias
 app.post('/nueva-noticia', (req, res) => {
-    const { titulo, autor, pass } = req.body; // Añadimos 'pass'
+    const { titulo, autor, pass } = req.body;
     
     if (pass === CLAVE_SECRETA) {
         noticias.unshift({ titulo, autor });
-        res.redirect('/');
+        // Redirigimos al admin con la clave para ver el cambio
+        res.redirect(`/admin?key=${CLAVE_SECRETA}`);
     } else {
-        res.send("<h1>Acceso denegado: Clave incorrecta</h1>");
+        res.status(403).send("<h1>Acceso denegado: Clave incorrecta</h1>");
     }
 });
 
@@ -61,9 +59,7 @@ app.post('/borrar-noticia', (req, res) => {
     const { index, pass } = req.body;
 
     if (pass === CLAVE_SECRETA) {
-        // Eliminamos el elemento del array usando su posición (index)
         noticias.splice(index, 1);
-        // Redirigimos de nuevo al admin con la clave para seguir editando
         res.redirect(`/admin?key=${CLAVE_SECRETA}`);
     } else {
         res.status(403).send("Acceso denegado");
