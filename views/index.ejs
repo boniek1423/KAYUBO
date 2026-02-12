@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <title>Mi Web con Node</title>
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+<body>
+    <h1>¡Bienvenido, <%= usuario %>!</h1>
+    <p>Estas son las noticias de hoy:</p>
+    
+    <ul>
+        <% noticias.forEach(noticia => { %>
+            <li>
+                <strong><%= noticia.titulo %></strong> - por <%= noticia.autor %>
+            </li>
+        <% }); %>
+    </ul>
+</body>
+</html>
