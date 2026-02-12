@@ -1,4 +1,6 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const cookieSession = require('cookie-session'); // Nueva librería
 const app = express();
 const path = require('path');
 
@@ -10,76 +12,104 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
-// --- VARIABLES GLOBALES (Mantenlas aquí arriba) ---
-const CLAVE_SECRETA = "kayubo123"; // <--- MOVIDA AQUÍ PARA QUE TODOS LA VEAN
-let noticias = [
-    { titulo: 'Node.js es veloz', autor: 'Admin' },
-    { titulo: 'Vercel es genial', autor: 'Soporte' }
-];
+// 3. Configuración de Sesiones (Cookies)
+app.use(cookieSession({
+    name: 'session',
+    keys: ['clave-secreta-de-kayubo-2026'], // Firma la cookie
+    maxAge: 24 * 60 * 60 * 1000 // La sesión dura 24 horas
+}));
 
-// 3. Ruta Principal
-app.get('/', (req, res) => {
-    res.render('index', { 
-        usuario: 'Programador', 
-        noticias: noticias 
+// --- CONEXIÓN A MONGO DB ATLAS ---
+// RECUERDA: Reemplaza <password> con tu contraseña real de Atlas
+const mongoURI = "mongodb+srv://boniekmedina_db_user:<password>@cluster0.cp45r6o.mongodb.net/kayubo?retryWrites=true&w=majority&appName=Cluster0";
+
+mongoose.connect(mongoURI)
+  .then(() => console.log("✅ Conectado a MongoDB Atlas"))
+  .catch(err => console.error("❌ Error de conexión:", err));
+
+// --- MODELOS DE DATOS ---
+
+// Modelo para las Noticias
+const Noticia = mongoose.model('Noticia', new mongoose.Schema({
+    titulo: String,
+    autor: String,
+    fecha: String
+}));
+
+// Modelo para los Usuarios Administradores
+const Usuario = mongoose.model('Usuario', new mongoose.Schema({
+    username: { type: String, unique: true },
+    password: { type: String }
+}));
+
+// --- RUTAS DE ACCESO (LOGIN) ---
+
+// Ver el formulario de login
+app.get('/login', (req, res) => {
+    res.render('login', { error: null });
+});
+
+// Procesar el inicio de sesión
+app.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    try {
+        const user = await Usuario.findOne({ username, password });
+        if (user) {
+            req.session.adminId = user._id; // Creamos la sesión
+            res.redirect('/admin');
+        } else {
+            res.render('login', { error: 'Usuario o contraseña incorrectos' });
+        }
+    } catch (err) {
+        res.status(500).send("Error en el servidor");
+    }
+});
+
+// Cerrar sesión
+app.get('/logout', (req, res) => {
+    req.session = null;
+    res.redirect('/');
+});
+
+// --- RUTAS DE CONTENIDO ---
+
+// Ruta Principal (Pública)
+app.get('/', async (req, res) => {
+    const noticiasDB = await Noticia.find().sort({ _id: -1 });
+    res.render('index', { usuario: 'Invitado', noticias: noticiasDB });
+});
+
+// Ruta del Panel Admin (Protegida)
+app.get('/admin', async (req, res) => {
+    if (!req.session.adminId) return res.redirect('/login'); // Validador de sesión
+
+    const noticiasDB = await Noticia.find().sort({ _id: -1 });
+    res.render('admin', { noticias: noticiasDB });
+});
+
+// Guardar noticia (Protegida)
+app.post('/nueva-noticia', async (req, res) => {
+    if (!req.session.adminId) return res.status(403).send("No autorizado");
+
+    const { titulo, autor } = req.body;
+    const fechaActual = new Date().toLocaleString('es-ES', {
+        day: '2-digit', month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
     });
+
+    await Noticia.create({ titulo, autor, fecha: fechaActual });
+    res.redirect('/admin');
 });
 
-// 4. Ruta del Panel Admin
-app.get('/admin', (req, res) => {
-    const llaveIngresada = req.query.key;
+// Borrar noticia (Protegida)
+app.post('/borrar-noticia', async (req, res) => {
+    if (!req.session.adminId) return res.status(403).send("No autorizado");
 
-    if (llaveIngresada === CLAVE_SECRETA) {
-        res.render('admin', { noticias: noticias }); 
-    } else {
-        res.redirect('/');
-    }
+    await Noticia.findByIdAndDelete(req.body.id);
+    res.redirect('/admin');
 });
 
-// 5. Lógica para GUARDAR noticias
-app.post('/nueva-noticia', (req, res) => {
-    const { titulo, autor, pass } = req.body;
-    
-    if (pass === CLAVE_SECRETA) {
-        // Creamos un objeto de fecha y lo formateamos
-        const fechaActual = new Date().toLocaleString('es-ES', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        // Guardamos la noticia incluyendo la fecha
-        noticias.unshift({ 
-            titulo, 
-            autor, 
-            fecha: fechaActual // <-- Nueva propiedad
-        });
-        
-        res.redirect(`/admin?key=${CLAVE_SECRETA}`);
-    } else {
-        res.status(403).send("Acceso denegado");
-    }
-});
-
-// 6. Ruta de Contacto
-app.post('/contacto', (req, res) => {
-    res.render('exito', { nombre: req.body.nombre });
-});
-
-// 7. Lógica para BORRAR noticias
-app.post('/borrar-noticia', (req, res) => {
-    const { index, pass } = req.body;
-
-    if (pass === CLAVE_SECRETA) {
-        noticias.splice(index, 1);
-        res.redirect(`/admin?key=${CLAVE_SECRETA}`);
-    } else {
-        res.status(403).send("Acceso denegado");
-    }
-});
-
+// --- INICIO DEL SERVIDOR ---
 if (process.env.NODE_ENV !== 'production') {
     const port = 3000;
     app.listen(port, () => console.log(`Corriendo en http://localhost:${port}`));
