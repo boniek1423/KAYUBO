@@ -2,10 +2,12 @@ const express = require('express');
 const app = express();
 const path = require('path');
 
-// Configuramos EJS como el motor de vistas
+// CONFIGURACIÓN CRÍTICA PARA VERCEL
 app.set('view engine', 'ejs');
+// Esta línea le dice a Vercel exactamente dónde está la carpeta views
+app.set('views', path.join(__dirname, 'views')); 
 
-// ESTA LÍNEA ES LA CLAVE:
+// Servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
@@ -14,14 +16,12 @@ app.get('/', (req, res) => {
         { titulo: 'Vercel es genial', autor: 'Soporte' }
     ];
     
-    // Renderizamos 'index.ejs' y le pasamos los datos
     res.render('index', { 
         usuario: 'Programador', 
         noticias: noticias 
     });
 });
 
-// Para desarrollo local (Vercel usará su propia gestión)
 if (process.env.NODE_ENV !== 'production') {
     app.listen(3000, () => console.log('http://localhost:3000'));
 }
