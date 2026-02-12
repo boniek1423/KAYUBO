@@ -41,11 +41,25 @@ app.post('/nueva-noticia', (req, res) => {
     const { titulo, autor, pass } = req.body;
     
     if (pass === CLAVE_SECRETA) {
-        noticias.unshift({ titulo, autor });
-        // Redirigimos al admin con la clave para ver el cambio
+        // Creamos un objeto de fecha y lo formateamos
+        const fechaActual = new Date().toLocaleString('es-ES', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        // Guardamos la noticia incluyendo la fecha
+        noticias.unshift({ 
+            titulo, 
+            autor, 
+            fecha: fechaActual // <-- Nueva propiedad
+        });
+        
         res.redirect(`/admin?key=${CLAVE_SECRETA}`);
     } else {
-        res.status(403).send("<h1>Acceso denegado: Clave incorrecta</h1>");
+        res.status(403).send("Acceso denegado");
     }
 });
 

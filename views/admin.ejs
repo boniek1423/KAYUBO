@@ -34,7 +34,9 @@
             <div class="flex justify-between items-center bg-slate-700 p-4 rounded-xl">
                 <div>
                     <p class="font-bold text-sm"><%= noticia.titulo %></p>
-                    <p class="text-xs text-slate-400"><%= noticia.autor %></p>
+                    <p class="text-xs text-slate-400">
+                        Por: <%= noticia.autor %> | <%= noticia.fecha || 'Sin fecha' %>
+                    </p>
                 </div>
                 <form action="/borrar-noticia" method="POST">
                     <input type="hidden" name="index" value="<%= index %>">

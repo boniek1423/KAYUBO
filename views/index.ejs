@@ -23,7 +23,11 @@
                     <% noticias.forEach(noticia => { %>
                         <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
                             <h3 class="font-bold text-lg text-indigo-900"><%= noticia.titulo %></h3>
-                            <p class="text-sm text-slate-400 mt-2">Publicado por: <span class="font-medium text-slate-600"><%= noticia.autor %></span></p>
+                            
+                            <div class="flex justify-between items-center mt-3 text-xs text-slate-400">
+                                <p>Por: <span class="font-medium text-slate-600"><%= noticia.autor %></span></p>
+                                <p>📅 <%= noticia.fecha || 'Reciente' %></p>
+                            </div>
                         </div>
                     <% }); %>
                 </div>
