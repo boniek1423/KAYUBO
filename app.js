@@ -41,15 +41,16 @@ app.get('/admin', (req, res) => {
     }
 });
 
-// 5. Lógica para GUARDAR noticias
+// 5. Lógica para GUARDAR noticias (Protegida)
 app.post('/nueva-noticia', (req, res) => {
-    const { titulo, autor } = req.body;
+    const { titulo, autor, pass } = req.body; // Añadimos 'pass'
     
-    // Agregamos la nueva noticia al principio del array
-    noticias.unshift({ titulo, autor });
-    
-    // Redirigimos al inicio para ver el cambio
-    res.redirect('/');
+    if (pass === CLAVE_SECRETA) {
+        noticias.unshift({ titulo, autor });
+        res.redirect('/');
+    } else {
+        res.send("<h1>Acceso denegado: Clave incorrecta</h1>");
+    }
 });
 
 // 6. Ruta de Contacto
