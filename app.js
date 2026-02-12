@@ -21,7 +21,7 @@ app.use(cookieSession({
 
 // --- CONEXIÓN A MONGO DB ATLAS ---
 // RECUERDA: Reemplaza <password> con tu contraseña real de Atlas
-const mongoURI = "mongodb+srv://boniekmedina_db_user:<password>@cluster0.cp45r6o.mongodb.net/kayubo?retryWrites=true&w=majority&appName=Cluster0";
+const mongoURI = "mongodb+srv://boniekmedina_db_user:1423Kata.10@cluster0.cp45r6o.mongodb.net/kayubo?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(mongoURI)
   .then(() => console.log("✅ Conectado a MongoDB Atlas"))
