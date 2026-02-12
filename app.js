@@ -26,9 +26,11 @@ app.get('/', (req, res) => {
 // 4. Ruta del Formulario (POST)
 app.post('/contacto', (req, res) => {
     const nombreUsuario = req.body.nombre;
-    console.log(`Mensaje recibido de: ${nombreUsuario}`);
-    // Respondemos algo sencillo para confirmar que funcionó
-    res.send(`<h1>¡Gracias ${nombreUsuario}!</h1><p>Hemos recibido tu nombre correctamente.</p><a href="/">Volver</a>`);
+    
+    // Ahora renderizamos la nueva vista 'exito'
+    res.render('exito', { 
+        nombre: nombreUsuario 
+    });
 });
 
 // 5. Servidor para modo local
