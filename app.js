@@ -25,18 +25,16 @@ app.get('/', (req, res) => {
     });
 });
 
-// 4. Ruta del Panel Admin (Solo para ver el formulario de creación)
-// Definimos nuestra contraseña (puedes cambiarla por lo que quieras)
-const CLAVE_SECRETA = "kayubo123";
-
-// 4. Ruta del Panel Admin (Con protección sencilla)
+// 4. Ruta del Panel Admin
 app.get('/admin', (req, res) => {
-    const key = req.query.key; // Buscamos ?key=... en la URL
+    const llaveIngresada = req.query.key;
+    const CLAVE_SECRETA = "kayubo123"; // Asegúrate de que coincida
 
-    if (key === CLAVE_SECRETA) {
-        res.render('admin');
+    if (llaveIngresada === CLAVE_SECRETA) {
+        // EL ARREGLO ESTÁ AQUÍ: Debes pasar { noticias: noticias }
+        res.render('admin', { noticias: noticias }); 
     } else {
-        // Si la clave no es correcta, lo mandamos al home
+        // Si no hay clave, redirigimos al home
         res.redirect('/');
     }
 });
