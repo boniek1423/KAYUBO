@@ -6,34 +6,46 @@ const path = require('path');
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// 2. Middlewares (Importante para el CSS y el Formulario)
+// 2. Middlewares
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true })); // Para leer datos del formulario
+app.use(express.urlencoded({ extended: true }));
 
-// 3. Ruta Principal (GET)
+// --- NUESTRA "BASE DE DATOS" TEMPORAL ---
+// Sacamos la lista de la ruta GET para que sea global y modificable
+let noticias = [
+    { titulo: 'Node.js es veloz', autor: 'Admin' },
+    { titulo: 'Vercel es genial', autor: 'Soporte' }
+];
+
+// 3. Ruta Principal (Muestra las noticias actuales)
 app.get('/', (req, res) => {
-    const noticias = [
-        { titulo: 'Node.js es veloz', autor: 'Admin' },
-        { titulo: 'Vercel es genial', autor: 'Soporte' }
-    ];
-    
     res.render('index', { 
         usuario: 'Programador', 
         noticias: noticias 
     });
 });
 
-// 4. Ruta del Formulario (POST)
-app.post('/contacto', (req, res) => {
-    const nombreUsuario = req.body.nombre;
-    
-    // Ahora renderizamos la nueva vista 'exito'
-    res.render('exito', { 
-        nombre: nombreUsuario 
-    });
+// 4. Ruta del Panel Admin (Solo para ver el formulario de creación)
+app.get('/admin', (req, res) => {
+    res.render('admin');
 });
 
-// 5. Servidor para modo local
+// 5. Lógica para GUARDAR noticias
+app.post('/nueva-noticia', (req, res) => {
+    const { titulo, autor } = req.body;
+    
+    // Agregamos la nueva noticia al principio del array
+    noticias.unshift({ titulo, autor });
+    
+    // Redirigimos al inicio para ver el cambio
+    res.redirect('/');
+});
+
+// 6. Ruta de Contacto
+app.post('/contacto', (req, res) => {
+    res.render('exito', { nombre: req.body.nombre });
+});
+
 if (process.env.NODE_ENV !== 'production') {
     const port = 3000;
     app.listen(port, () => console.log(`Corriendo en http://localhost:${port}`));
