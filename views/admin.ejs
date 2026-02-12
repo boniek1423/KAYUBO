@@ -26,6 +26,24 @@
         <div class="mt-6 text-center">
             <a href="/" class="text-slate-500 hover:text-white text-sm">← Volver a la web</a>
         </div>
+        <div class="mt-12 border-t border-slate-700 pt-8">
+    <h2 class="text-xl font-bold mb-4 text-indigo-300">Gestionar Noticias</h2>
+    <div class="space-y-3">
+        <% noticias.forEach((noticia, index) => { %>
+            <div class="flex justify-between items-center bg-slate-700 p-4 rounded-xl">
+                <div>
+                    <p class="font-bold text-sm"><%= noticia.titulo %></p>
+                    <p class="text-xs text-slate-400"><%= noticia.autor %></p>
+                </div>
+                <form action="/borrar-noticia" method="POST">
+                    <input type="hidden" name="index" value="<%= index %>">
+                    <input type="hidden" name="pass" value="kayubo123">
+                    <button type="submit" class="text-red-400 hover:text-red-200 text-sm font-bold">Eliminar</button>
+                </form>
+            </div>
+        <% }); %>
+    </div>
+</div>
     </div>
 </body>
 </html>

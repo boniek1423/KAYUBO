@@ -58,6 +58,20 @@ app.post('/contacto', (req, res) => {
     res.render('exito', { nombre: req.body.nombre });
 });
 
+// 7. Lógica para BORRAR noticias
+app.post('/borrar-noticia', (req, res) => {
+    const { index, pass } = req.body;
+
+    if (pass === CLAVE_SECRETA) {
+        // Eliminamos el elemento del array usando su posición (index)
+        noticias.splice(index, 1);
+        // Redirigimos de nuevo al admin con la clave para seguir editando
+        res.redirect(`/admin?key=${CLAVE_SECRETA}`);
+    } else {
+        res.status(403).send("Acceso denegado");
+    }
+});
+
 if (process.env.NODE_ENV !== 'production') {
     const port = 3000;
     app.listen(port, () => console.log(`Corriendo en http://localhost:${port}`));
