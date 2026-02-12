@@ -26,8 +26,19 @@ app.get('/', (req, res) => {
 });
 
 // 4. Ruta del Panel Admin (Solo para ver el formulario de creación)
+// Definimos nuestra contraseña (puedes cambiarla por lo que quieras)
+const CLAVE_SECRETA = "kayubo123";
+
+// 4. Ruta del Panel Admin (Con protección sencilla)
 app.get('/admin', (req, res) => {
-    res.render('admin');
+    const key = req.query.key; // Buscamos ?key=... en la URL
+
+    if (key === CLAVE_SECRETA) {
+        res.render('admin');
+    } else {
+        // Si la clave no es correcta, lo mandamos al home
+        res.redirect('/');
+    }
 });
 
 // 5. Lógica para GUARDAR noticias
